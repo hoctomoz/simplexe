@@ -1,6 +1,6 @@
-let ( *% ) lambda a = Array.map (fun x -> lambda *. x) a;;
-
-let normalize i a = (- 1. /. a.(i)) *% a;;
+let normalize i a =
+  let coeff = - 1. /. a.(i) in
+  Array.iteri (fun k -> fun x -> a.(k) <- coeff *. x) a;;
 
 let substitute i a b =
 (* Substitue la variable i de a par l'équation donnée dans b *)
@@ -11,7 +11,7 @@ let substitute i a b =
 
 let substituteMatrix i j m =
 (* Substitue la variable j de m.(k) par l'équation donnée dans m.(i), pour k <> i *) 
-  Array.iteri (fun k -> fun a -> substitute j a m.(i));;
+  Array.iteri (fun k -> fun a -> substitute j a m.(i)) m;;
 
 let enteringVariable a =
 (* Renvoie le plus petit indice i tel que a.(i) > 0. *)

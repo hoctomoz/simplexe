@@ -10,10 +10,12 @@ object (this)
   val ncons : int = nconsP
   val objective : value array = Array.make (nvarP + nconsP + 2) 0.
   val constraints : value array array = Array.make_matrix nconsP (nvarP + nconsP + 2) 0.
-  (* NB : On garde la constante en première position (matrix[i][0]) *)
+  (* On garde la constante en première position (matrix[i][0]) *)
   (* On rajoute une dernière colonne à la fin pour l'éventuelle première phase, sinon il faudrait redéfinir tout l'objet... *)
   val variables : int array = Array.init nconsP (fun x -> x + nvarP)
   (* On repère quelle est la variable de chaque ligne que l'on assigne *)
+
+  (* On conserve l'invariant suivant : forall i, constraints.(i) est normalisé suivant variables.(i) *)
 
   (* Méthodes *)
   method print_constraint i =
@@ -47,4 +49,35 @@ object (this)
       print_float (objective.(i));
       print_string "*x"; print_int i;
     done;
+
+  method currentPoint () =
+    let point = Array.make (nvar+ncons) 0. in
+
+    for i = 1 to nvarP do
+      point.(variables.(i)-1) <- constraints.(i).(0)
+    done;
+    
+    point
+
+  method evaluate () =
+    let a = this#currentPoint() in
+    let resultat = ref 0. in
+    for i = 0 to nvar + ncons - 1 do
+      resultat := !resultat +. a.(i) *. objective.(i+1);
+    done;
+    !resultat;
+
+  method secondPhase () =
+    match enteringVariable objective with
+    | None -> ()
+    | Some k -> match leavingVariable k constraints with
+      | None -> ()
+      | Some i ->
+	normalize k constraints.(i);
+	variables.(i) <- k;
+	substitute k objective constraints.(i);
+	substituteMatrix i k constraints;
+
+	this#print ();
+	this#secondPhase ();
 end;;
