@@ -11,6 +11,7 @@ pb#setConstraints m;;
 
 pb#print();;
 pb#secondPhase();;
+pb#printCurrentPoint();;
 
 let pb' = new simplex 3 2 [] [];;
 let o = [|0.; 2.; 3.; 4.; 0.; 0.; 0. |] in
@@ -22,5 +23,6 @@ pb'#setConstraints m;;
 
 pb'#print();;
 pb'#secondPhase();;
+pb'#printCurrentPoint();;
 
 

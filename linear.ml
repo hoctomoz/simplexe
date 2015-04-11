@@ -1,3 +1,5 @@
+let print_array m = Array.iter (fun x -> print_float x; print_char ' ') m;;
+
 let normalize i a =
   let coeff = - 1. /. a.(i) in
   Array.iteri (fun k -> fun x -> a.(k) <- coeff *. x) a;;

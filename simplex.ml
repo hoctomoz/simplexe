@@ -62,11 +62,13 @@ object (this)
   method currentPoint () =
     let point = Array.make (nvar+ncons) 0. in
 
-    for i = 1 to nvarP do
+    for i = 0 to ncons-1 do
       point.(variables.(i)-1) <- constraints.(i).(0)
     done;
     
     point
+
+  method printCurrentPoint () = print_array (this#currentPoint()); print_newline();
 
   method evaluate () =
     let a = this#currentPoint() in
