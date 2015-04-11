@@ -11,7 +11,7 @@ let substitute i a b =
 
 let substituteMatrix i j m =
 (* Substitue la variable j de m.(k) par l'équation donnée dans m.(i), pour k <> i *) 
-  Array.iteri (fun k -> fun a -> substitute j a m.(i)) m;;
+  Array.iteri (fun k -> fun a -> if k <> i then substitute j a m.(i)) m;;
 
 let enteringVariable a =
 (* Renvoie le plus petit indice i tel que a.(i) > 0. *)

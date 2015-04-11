@@ -8,23 +8,29 @@ object (this)
   (* Variables *)
   val nvar : int = nvarP
   val ncons : int = nconsP
-  val objective : value array = Array.make (nvarP + nconsP + 2) 0.
-  val constraints : value array array = Array.make_matrix nconsP (nvarP + nconsP + 2) 0.
+  val mutable objective : value array = Array.make (nvarP + nconsP + 2) 0.
+  val mutable constraints : value array array = Array.make_matrix nconsP (nvarP + nconsP + 2) 0.
   (* On garde la constante en première position (matrix[i][0]) *)
   (* On rajoute une dernière colonne à la fin pour l'éventuelle première phase, sinon il faudrait redéfinir tout l'objet... *)
-  val variables : int array = Array.init nconsP (fun x -> x + nvarP)
+  val variables : int array = Array.init nconsP (fun x -> x + nvarP + 1)
   (* On repère quelle est la variable de chaque ligne que l'on assigne *)
 
   (* On conserve l'invariant suivant : forall i, constraints.(i) est normalisé suivant variables.(i) *)
 
   (* Méthodes *)
+  (* Setters et getter à supprimer : juste pour tester, en attendant le parser
+     retirer le cara mutable aussi... *)
+  method setObjective o = objective <- o
+
+  method setConstraints m = constraints <- m
+
   method print_constraint i =
     if constraints.(i).(variables.(i)) <> -1. then failwith "Erreur dans print_constraint : équation non normalisée";
     print_string "x"; print_int variables.(i); print_string " = ";
     print_float constraints.(i).(0);
     
-    for k = 1 to nvar + ncons do
-      if k <> variables.(i) then begin
+    for k = 1 to nvar + ncons + 1 do
+      if k <> variables.(i) && constraints.(i).(k) <> 0. then begin
 	print_string " + ";
 	print_float constraints.(i).(k);
 	print_string "*x";
@@ -44,11 +50,14 @@ object (this)
     print_newline();
     print_string "z = ";
     print_float (objective.(0));
-    for i = 1 to nvar + ncons do
-      print_string " + ";
-      print_float (objective.(i));
-      print_string "*x"; print_int i;
+    for i = 1 to nvar + ncons + 1 do
+      if objective.(i) <> 0. then begin
+	print_string " + ";
+	print_float (objective.(i));
+	print_string "*x"; print_int i;
+      end;
     done;
+    print_string "\n\n";
 
   method currentPoint () =
     let point = Array.make (nvar+ncons) 0. in
