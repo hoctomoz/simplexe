@@ -1,7 +1,7 @@
 all: 
 	ocamlbuild -yaccflag -v -lib unix main.native; ln -fs main.native toto
 
-byte: 
+byte:
 	ocamlbuild -yaccflag -v main.byte
 
 clean: 

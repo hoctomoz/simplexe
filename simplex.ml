@@ -16,6 +16,6 @@ object (this)
   (* On repère quelle est la variable de chaque ligne que l'on assigne *)
 
   (* Méthodes *)
-  method print () =
+  method print () = ()
 
 end;;
