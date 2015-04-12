@@ -1,0 +1,36 @@
+Algorithme du simplexe
+Léo Exibard & Paul Fermé
+
+Langage utilisé : OCaml
+
+Format d'entrée : (...) (Celui décrit dans l'énoncé)
+
+Rôles des différents modules :
+      - lexer.mll et parser.mly : lexer et parser du format d'entrée, qui mettent
+      au passage celle-ci sous forme normale.
+
+      - linear.ml : fonctions sur les tableau utililes pour l'implémentation de
+      l'algorithme du simplexe. Certaines d'entres elles font notamment l'hypothèse
+      de notre choix de représentation des équations.
+
+      - simplex.ml : coeur de l'implémentation. Y est définie la classe "simplex",
+      dont les objets sont des dictionnaires de programmes linéaires. On a pris comme
+      conventions :
+      	* Une contrainte = un tableau
+	* La ième coordonnée du tableau correspond au coefficient devant la ième
+	variable (slack variables comprises), tels que "la somme de ces produits
+	coefficients/variables = 0" correspond à notre équation du dictionnaire
+	* On prend comme convention que la 0ème coordonnée est la constante, et que
+	la (nvar+ncons+1)ème coordonnée correspond à la variables que l'on rajoute
+	éventuellement lors de la première phase de l'algorithme. Certaines fonctions
+	de linear.ml font cette hypothèse.
+	* La fonction objectif est représenté par l'équation du tableau "objective",
+	sauf qu'on a que "la somme de ces produits coefficients/variables" = z, où
+	z est l'objectif à maximiser (au lieu de 0).
+	* On garde également en mémoire le numéro des variables à gauche des équations
+	dans le tableau "variables".
+	* Une équation est normalisée si le coefficient de sa variable à gauche vaut
+	"-1." (donc est égale à la somme des autres coefficients*variables). Certaines
+	fonctions de linear font cette hypothèse (mais la vérifie).
+
+      - main.ml : main du programme, reliant toutes les parties entre elles.
