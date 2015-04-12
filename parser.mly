@@ -3,7 +3,32 @@
 
 open Simplex
 
-let normalize max objectiveFunction constraints bounds variables =
+let objectiveFunctionFromList objectiveList variables nvar ncons =
+    let objective = Array.make (nvar + ncons + 2) 0. in
+    List.iter (
+    	      fun (var, coeff) ->
+	      	  let varIndex = find variables var in
+		  objective[varIndex] <- objective[varIndex] +. coeff
+	      )
+	      objectiveList;
+    objective
+
+let constraintsFromList constraintsList variables nvar ncons =
+    let constraints = Array.make_matrix ncons (nvar + ncons + 2) 0. in
+    List.iteri (
+    	      fun i, (lowerBound, expression) ->
+	      	  constraints[i][0] <- -. lowerBound;
+	      	  List.iter (
+		  	    fun (var, coeff) ->
+			    	let varIndex = find variables var in
+				constraints[i][varIndex] <- constraints[i][varIndex] +. coeff
+			    ) expression;
+	       ) constraintsList;
+    constraints
+
+
+let buildInstance max objectiveFunction constraints bounds variables =
+
     new Simplex.simplex 0 0 (Array.make 0 0.) (Array.make_matrix 0 0 0.)
 
 let add expr1 expr2 =
@@ -30,7 +55,7 @@ let substract expr1 expr2 =
 %%
 main:
   |COM EOL main                   { $3 }
-  |objective objectiveFunction ST constraints BDS bounds VARS variables EOF { normalize $1 $2 $4 $6 $8 }
+  |objective objectiveFunction ST constraints BDS bounds VARS variables EOF { buildInstance $1 $2 $4 $6 $8 }
 ;
 
 objective:
