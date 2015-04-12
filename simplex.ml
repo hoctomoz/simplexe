@@ -24,7 +24,7 @@ object (this)
 
   method setConstraints m = constraints <- m
 
-  method print_constraint i =
+  method printConstraint i =
     if constraints.(i).(variables.(i)) <> -1. then failwith "Erreur dans print_constraint : équation non normalisée";
     print_string "x"; print_int variables.(i); print_string " = ";
     print_float constraints.(i).(0);
@@ -42,7 +42,7 @@ object (this)
 
   method print () =
     for i = 0 to ncons-1 do
-      this#print_constraint i;
+      this#printConstraint i;
     done;
     for i = 0 to nvar + ncons + 1 do
       print_string "-------";
@@ -70,13 +70,22 @@ object (this)
 
   method printCurrentPoint () = print_array (this#currentPoint()); print_newline();
 
-  method evaluate () =
-    let a = this#currentPoint() in
-    let resultat = ref 0. in
-    for i = 0 to nvar + ncons - 1 do
-      resultat := !resultat +. a.(i) *. objective.(i+1);
+  method evaluate () = objective.(0)
+
+  method certificate () =
+    let cert = Array.make (nvar+ncons) 0. in
+
+    for i = 0 to ncons-1 do
+      cert.(i) <- objective.(i+1)
     done;
-    !resultat;
+
+    cert
+
+  method printCertificate () = print_array (this#certificate()); print_newline();
+
+  method firstPhase () =
+    (* TODO *)
+    ()
 
   method secondPhase () =
     match enteringVariable objective with
@@ -91,4 +100,11 @@ object (this)
 
 	this#print ();
 	this#secondPhase ();
+	
+  method solve () =
+    (* TO PRECISE *)
+    this#firstPhase ();
+    this#secondPhase ();
+    this#currentPoint (), this#evaluate (), this#certificate ()
+
 end;;
