@@ -1,6 +1,6 @@
 open Linear;;
 
-type value = float;;
+type solution = Opt | Empty | Unbound;;
 
 class simplex nvarP nconsP constraintsP objectiveP =
 object (this)
@@ -8,8 +8,8 @@ object (this)
   (* Variables *)
   val nvar : int = nvarP
   val ncons : int = nconsP
-  val mutable objective : value array = Array.make (nvarP + nconsP + 2) 0.
-  val mutable constraints : value array array = Array.make_matrix nconsP (nvarP + nconsP + 2) 0.
+  val mutable objective : float array = Array.make (nvarP + nconsP + 2) 0.
+  val mutable constraints : float array array = Array.make_matrix nconsP (nvarP + nconsP + 2) 0.
   (* On garde la constante en première position (matrix[i][0]) *)
   (* On rajoute une dernière colonne à la fin pour l'éventuelle première phase, sinon il faudrait redéfinir tout l'objet... *)
   val variables : int array = Array.init nconsP (fun x -> x + nvarP + 1)
@@ -85,13 +85,13 @@ object (this)
 
   method firstPhase () =
     (* TODO *)
-    ()
+    Opt
 
   method secondPhase () =
     match enteringVariable objective with
-    | None -> ()
+    | None -> Opt
     | Some k -> match leavingVariable k constraints with
-      | None -> ()
+      | None -> Unbound
       | Some i ->
 	normalize k constraints.(i);
 	variables.(i) <- k;
@@ -102,9 +102,8 @@ object (this)
 	this#secondPhase ();
 	
   method solve () =
-    (* TO PRECISE *)
-    this#firstPhase ();
-    this#secondPhase ();
-    this#currentPoint (), this#evaluate (), this#certificate ()
+    match this#firstPhase () with
+    | Opt -> this#secondPhase ();
+    | _ (* c'est toujours Empty *) -> Empty
 
 end;;
