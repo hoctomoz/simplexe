@@ -1,4 +1,5 @@
 open Simplex;;
+open Parser;;
 
 (* Main *)
 let pb = new simplex 3 2 [] [];;

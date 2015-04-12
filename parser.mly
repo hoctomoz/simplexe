@@ -2,13 +2,14 @@
 (* --- préambule: ici du code Caml --- *)
 
 open Simplex
+open Hashtbl
 
 let objectiveFunctionFromList objectiveList variables nvar ncons =
     let objective = Array.make (nvar + ncons + 2) 0. in
     List.iter (
     	      fun (var, coeff) ->
-	      	  let varIndex = find variables var in
-		  objective[varIndex] <- objective[varIndex] +. coeff
+	      	  let varIndex = Hashtbl.find variables var in
+		  objective.(varIndex) <- objective.(varIndex) +. coeff;
 	      )
 	      objectiveList;
     objective
@@ -16,16 +17,15 @@ let objectiveFunctionFromList objectiveList variables nvar ncons =
 let constraintsFromList constraintsList variables nvar ncons =
     let constraints = Array.make_matrix ncons (nvar + ncons + 2) 0. in
     List.iteri (
-    	      fun i, (lowerBound, expression) ->
-	      	  constraints[i][0] <- -. lowerBound;
+    	      fun i (lowerBound, expression) ->
+	      	  constraints.(i).(0) <- -. lowerBound;
 	      	  List.iter (
 		  	    fun (var, coeff) ->
 			    	let varIndex = find variables var in
-				constraints[i][varIndex] <- constraints[i][varIndex] +. coeff
+				constraints.(i).(varIndex) <- constraints.(i).(varIndex) +. coeff
 			    ) expression;
 	       ) constraintsList;
     constraints
-
 
 let buildInstance max objectiveFunction constraints bounds variables =
 
