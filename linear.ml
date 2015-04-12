@@ -17,6 +17,7 @@ let substituteMatrix i j m =
 
 let enteringVariable a =
 (* Renvoie le plus petit indice i tel que a.(i) > 0. *)
+(* La constante est localisée dans a.(0) *)
   let n = Array.length a in
   let k = ref 1 in
   let check = ref true in
@@ -33,6 +34,8 @@ let enteringVariable a =
 
 let leavingVariable i m =
 (* Renvoie l'indice de la ligne de m où l'équation est la plus contraignante pour i *)
+(* La constante est localisée dans a.(0) *)
+
   let n = Array.length m in
   let min = ref 0. in
   let indice = ref None in
