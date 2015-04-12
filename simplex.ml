@@ -85,7 +85,7 @@ object (this)
 
   method firstPhase () =
     (* TODO *)
-    Opt
+    ()
 
   method secondPhase () =
     match enteringVariable objective with
@@ -102,8 +102,8 @@ object (this)
 	this#secondPhase ();
 	
   method solve () =
-    match this#firstPhase () with
-    | Opt -> this#secondPhase ();
-    | _ (* c'est toujours Empty *) -> Empty
+    this#firstPhase();
+    if this#evaluate() < 0. then Empty
+    else this#secondPhase();
 
 end;;
