@@ -85,7 +85,14 @@ object (this)
 
   method firstPhase () =
     (* TODO *)
-    ()
+    true (* renvoie true si pas empty *)
+
+  method switch k i =
+    (* Échange la variable entrante k avec la ième contrainte, conserve l'invariant de normalisation *)
+    normalize k constraints.(i);
+    variables.(i) <- k;
+    substitute k objective constraints.(i);
+    substituteMatrix i k constraints;
 
   method secondPhase () =
     match enteringVariable objective with
@@ -93,17 +100,12 @@ object (this)
     | Some k -> match leavingVariable k constraints with
       | None -> Unbound
       | Some i ->
-	normalize k constraints.(i);
-	variables.(i) <- k;
-	substitute k objective constraints.(i);
-	substituteMatrix i k constraints;
-
+	this#switch k i;
 	this#print ();
 	this#secondPhase ();
 	
   method solve () =
-    this#firstPhase();
-    if this#evaluate() < 0. then Empty
-    else this#secondPhase();
+    if this#firstPhase() then this#secondPhase()
+    else Empty;
 
 end;;
