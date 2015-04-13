@@ -2,6 +2,9 @@ open Linear;;
 
 type solution = Opt | Empty | Unbound;;
 
+let latexPrelude = "\\documentclass{article}\n\n\\usepackage[utf8]{inputenc}\n\\usepackage{amsmath}\n\n\\begin{document}\n\n";;
+let latexPostlude = "\\end{document}";;
+
 class simplex nvarP nconsP constraintsP objectiveP =
 object (this)
 
@@ -93,6 +96,9 @@ object (this)
     done;
     !s ^ "\n\\end{cases}\n\\end{equation*}\n\n";
 
+  method printWhat b =
+    if b then print_string (this#latex())
+    else this#print();
 
   method currentPoint () =
     let point = Array.make (nvar+ncons) 0. in
@@ -118,7 +124,7 @@ object (this)
 
   method printCertificate () = print_array (this#certificate()); print_newline();
 
-  method firstPhase () =
+  method firstPhase print =
     (* TODO *)
     true (* renvoie true si pas empty *)
 
@@ -129,18 +135,21 @@ object (this)
     substitute k objective constraints.(i);
     substituteMatrix i k constraints;
 
-  method secondPhase () =
+  method secondPhase print =
     match enteringVariable objective with
     | None -> Opt
     | Some k -> match leavingVariable k constraints with
       | None -> Unbound
       | Some i ->
 	this#switch k i;
-	this#print ();
-	this#secondPhase ();
-	
-  method solve () =
-    if this#firstPhase() then this#secondPhase()
+	this#printWhat print;
+	this#secondPhase print;
+
+  method solve print =
+    if print then print_string latexPrelude;
+    this#printWhat print;
+    if this#firstPhase print then this#secondPhase print
     else Empty;
+    if print then print_string latexPostlude;
 
 end;;

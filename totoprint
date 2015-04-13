@@ -1,0 +1,6 @@
+#!/bin/bash
+
+./print.native > temp.tex
+pdflatex temp.tex
+mv temp.pdf output.pdf
+rm temp.*

@@ -10,6 +10,4 @@ let m = [|[|10.; -3.; -2.; -1.; -1.; 0.; 0. |];
 	|] in
 pb#setConstraints m;;
 
-pb#print();;
-pb#solve();;
-print_string (pb#latex());;
+pb#solve false;;
