@@ -59,6 +59,41 @@ object (this)
     done;
     print_string "\n\n";
 
+  method latexConstraint i =
+    if constraints.(i).(variables.(i)) <> -1. then failwith "Erreur dans print_constraint : équation non normalisée";
+    let s = ref "" in
+    s := !s
+    ^"x_"^string_of_int(variables.(i))
+    ^" & = "
+    ^string_of_float(constraints.(i).(0));
+    
+    for k = 1 to nvar + ncons + 1 do
+      if k <> variables.(i) && constraints.(i).(k) <> 0.
+      then s := !s
+	^" + "
+	^string_of_float(constraints.(i).(k))
+	^" * x_"^string_of_int(k);
+    done;
+    !s ^ "\\\\\n"
+
+  method latex () =
+    let s = ref "\\begin{equation*}\n\\begin{cases}\n" in
+    for i = 0 to ncons-1 do
+      s := !s ^ this#latexConstraint i;
+    done;
+    s := !s^"z & = "^string_of_float(objective.(0));
+
+    for i = 1 to nvar + ncons + 1 do
+      if objective.(i) <> 0. then begin
+	s := !s
+	^" + "
+	^string_of_float(objective.(i))
+	^" * x_"^string_of_int(i);
+      end;
+    done;
+    !s ^ "\n\\end{cases}\n\\end{equation*}\n\n";
+
+
   method currentPoint () =
     let point = Array.make (nvar+ncons) 0. in
 

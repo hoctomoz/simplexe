@@ -12,3 +12,4 @@ pb#setConstraints m;;
 
 pb#print();;
 pb#solve();;
+print_string (pb#latex());;
