@@ -1,7 +1,0 @@
-#!/bin/bash
-
-make print
-./print.native $1 > temp.tex 
-pdflatex temp.tex
-mv temp.pdf output.pdf
-rm temp.*

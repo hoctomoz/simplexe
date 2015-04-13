@@ -74,12 +74,6 @@ let rec buildInstance max objectiveFunction constraints bounds variableList =
                                 (objectiveFunctionFromList objectiveFunction variableTable nvar ncons)
                 end
 
-let add expr1 expr2 =
-        []
-
-let substract expr1 expr2 =
-        []
-
         %}
 /* description des lexèmes */
 
@@ -97,42 +91,52 @@ let substract expr1 expr2 =
 
 %%
 main:
-  |COM EOL main                   { $3 }
+  |COM EOL main                         { $3 }
   |objective objectiveFunction ST constraints BDS bounds VARS variables EOF { buildInstance $1 $2 $4 $6 $8 }
   ;
 
   objective:
-  |MAX                            { true }
-  |MIN                            { false }
+  |MAX                                  { true }
+  |MIN                                  { false }
   ;
 
   objectiveFunction:
-  |expression                     { $1 }
+  |expression                           { $1 }
   ;
 
   expression:
-  |expression PLUS expression     { add $1 $3 }
-  |expression MINUS expression    { substract $1 $3 }
-  |VAL VAR                        { [($2, $1)] }
-  |VAR                            { [($1, 1.)] }
-  ;
+  |expression PLUS atomicExpression     {$3 :: $1 }
+  |expression MINUS atomicExpression    { let (var, coeff) = $3 in (var, -.coeff) :: $1 }
+  |atomicExpression                     { [$1] }
+;
+  
+  atomicExpression:
+  |VAL VAR                              { ($2, $1) }
+  |VAR                                  { ($1, 1.) }
+;
 
   constraints:
-  |constraints EOL constraints    { $1 @ $3 }
-  |expression LEQ VAL             { [($3, $1)] }
-  |expression GEQ VAL             { [(-.$3, substract [] $1)] }
-  |expression EQ  VAL             { [($3, $1); (-.$3, substract [] $1)] }
-  ;
+  |singleConstraint EOL constraints     { $1 @ $3 }
+  |singleConstraint EOL                 { $1 }
+;
+
+  singleConstraint: /* constraint is a reserved word */
+  |expression LEQ VAL                   { [($3, $1)] }
+  |expression GEQ VAL                   { [(-.$3, minusExpression $1)] }
+  |expression EQ  VAL                   { [($3, $1); (-.$3, minusExpression $1)] }
+;
 
   bounds:
-  |bounds EOL bounds              { $1 @ $3 }
-  |VAR GEQ VAL                    { [(-.$3, [($1, -.1.)])] }
-  |VAR LEQ VAL                    { [($3, [($1, 1.)])] }
-  |VAL LEQ VAR LEQ VAL            { [($1, [($3, 1.)]); (-.$5, [($3, -.1.)])] }
-  |VAL GEQ VAR GEQ VAL            { [(-.$1, [($3, -.1.)]); ($5, [($3, 1.)])] }
+  |bound EOL bounds                     { $1 @ $3 }
+;
+  bound:
+  |VAR GEQ VAL                          { [(-.$3, [($1, -.1.)])] }
+  |VAR LEQ VAL                          { [($3, [($1, 1.)])] }
+  |VAL LEQ VAR LEQ VAL                  { [($1, [($3, 1.)]); (-.$5, [($3, -.1.)])] }
+  |VAL GEQ VAR GEQ VAL                  { [(-.$1, [($3, -.1.)]); ($5, [($3, 1.)])] }
   ;
 
   variables:
-  |variables EOL variables        { $1 @ $3 }
-  |VAR                            { [$1] }
+  |VAR EOL variables                    { $1 :: $3 }
+  |VAR EOL                              { [$1] }
   ;
