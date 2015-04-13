@@ -6,24 +6,35 @@ open Hashtbl
 (* Set of variables *)
 module VariableSet = Set.Make(String)
 
-let objectiveFunctionFromList objectiveList variables nvar ncons =
+let nameVariables variableList =
+        let nvar = List.length variableList in
+        let variableTable = Hashtbl.create nvar in
+        let variables = Array.make nvar "" in
+        List.iteri (
+                fun i variable ->
+                        Hashtbl.add variableTable variable i;
+                        variables.(i) <- variable
+                        ) variableList;
+        (variables, variableTable)
+
+let objectiveFunctionFromList objectiveList variableTable nvar ncons =
         let objective = Array.make (nvar + ncons + 2) 0. in
         List.iter (
                 fun (var, coeff) ->
-                        let varIndex = Hashtbl.find variables var in
+                        let varIndex = Hashtbl.find variableTable var in
                         objective.(varIndex) <- objective.(varIndex) +. coeff;
                         )
         objectiveList;
     objective
 
-let constraintsFromList constraintsList variables nvar ncons =
+let constraintsFromList constraintsList variableTable nvar ncons =
         let constraints = Array.make_matrix ncons (nvar + ncons + 2) 0. in
         List.iteri (
                 fun i (lowerBound, expression) ->
                         constraints.(i).(0) <- -. lowerBound;
                   List.iter (
                           fun (var, coeff) ->
-                                  let varIndex = find variables var in
+                                  let varIndex = find variableTable var in
                                   constraints.(i).(varIndex) <- constraints.(i).(varIndex) +. coeff
                                   ) expression;
                   ) constraintsList;
@@ -38,12 +49,30 @@ let splitBounds boundsList =
         (List.fold_left (fun boundedSet -> function
                 | (0., [(var, _)]) -> VariableSet.add var boundedSet
                 | _ -> assert false
-                ) VariableSet.empty bounded,
+        ) VariableSet.empty bounded,
         varConstraints)
 
-let buildInstance max objectiveFunction constraints bounds variables =
+let minusExpression expression =
+        List.map (fun (var, coeff) -> (var, -.coeff)) expression
 
-        new Simplex.simplex 0 0 (Array.make 0 0.) (Array.make_matrix 0 0 0.)
+let revertConstraintsList constraintsList =
+        List.map (fun (lowerBound, expression) -> (-.lowerBound, minusExpression expression)) constraintsList
+
+let rec buildInstance max objectiveFunction constraints bounds variableList =
+        if not max
+        then buildInstance true (minusExpression objectiveFunction) (revertConstraintsList constraints) (revertConstraintsList bounds) variableList
+        else
+                begin
+
+                        let (variables, variableTable) = nameVariables variableList in
+                        let (bounded, varConstraints) = splitBounds bounds in
+                        let globalConstraints = varConstraints @ constraints in
+                        let ncons = List.length globalConstraints in
+                        let nvar = Hashtbl.length variableTable in
+                        new Simplex.simplex nvar ncons
+                                (constraintsFromList globalConstraints variableTable nvar ncons)
+                                (objectiveFunctionFromList objectiveFunction variableTable nvar ncons)
+                end
 
 let add expr1 expr2 =
         []
