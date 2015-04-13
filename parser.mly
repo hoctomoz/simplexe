@@ -92,7 +92,7 @@ let rec buildInstance max objectiveFunction constraints bounds variableList =
 %%
 main:
   |COM EOL main                         { $3 }
-  |objective objectiveFunction ST constraints BDS bounds VARS variables EOF { buildInstance $1 $2 $4 $6 $8 }
+  |objective EOL objectiveFunction EOL ST EOL constraints EOL BDS EOL bounds EOL VARS EOL variables EOF { buildInstance $1 $3 $7 $11 $15 }
   ;
 
   objective:
@@ -128,6 +128,7 @@ main:
 
   bounds:
   |bound EOL bounds                     { $1 @ $3 }
+  |bound EOL                            { $1 }
 ;
   bound:
   |VAR GEQ VAL                          { [(-.$3, [($1, -.1.)])] }
