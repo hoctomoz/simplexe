@@ -8,4 +8,4 @@ byte:
 	ocamlbuild -yaccflag -v main.byte
 
 clean: 
-	ocamlbuild -clean; rm toto; rm totoprint
+	ocamlbuild -clean; rm toto
