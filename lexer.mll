@@ -16,18 +16,19 @@ rule token = parse    (* la "fonction" aussi s'appelle token .. *)
                                       associé au tampon où sont
                                       lus les caractères *)
 
-  | '+'	      				{ print_string "PLUS   \n";      PLUS }
-  | '-'            			{ print_string "MINUS  \n";      MINUS }
-  | "MINIMIZE"				{ print_string "MIN    \n";      MIN }
-  | "MAXIMIZE"				{ print_string "MAX    \n";      MAX }
-  | "SUBJECT TO"			{ print_string "ST     \n";      ST }
-  | "BOUNDS" 				{ print_string "BDS    \n";      BDS }
-  | "VARIABLES"				{ print_string "VARS   \n";      VARS }
-  | "END"                               { print_string "END    \n";      END }
-  | "<="     				{ print_string "LEQ    \n";      LEQ }
-  | ">="				{ print_string "GEQ    \n";      GEQ }
-  | '='					{ print_string "EQ     \n";      EQ }
-  | alpha+ ('_' digit+)* as v		{ Printf.printf "VAR(%s)\n" (v); VAR(v) }
-  | scForm as f		   		{ Printf.printf "VAL(%s)\n" (f); VAL(float_of_string f) }
-  | '\n'(comment|'\n')*                 { print_string "EOL    \n";      EOL }
-  | eof                        		{ print_string "EOF    \n";      EOF }
+                                          (* TODO : remove.                *)
+  | '+'	      				{ (* print_string "PLUS   \n";     *) PLUS }
+  | '-'            			{ (* print_string "MINUS  \n";     *) MINUS }
+  | "MINIMIZE"				{ (* print_string "MIN    \n";     *) MIN }
+  | "MAXIMIZE"				{ (* print_string "MAX    \n";     *) MAX }
+  | "SUBJECT TO"			{ (* print_string "ST     \n";     *) ST }
+  | "BOUNDS" 				{ (* print_string "BDS    \n";     *) BDS }
+  | "VARIABLES"				{ (* print_string "VARS   \n";     *) VARS }
+  | "END"                               { (* print_string "END    \n";     *) END }
+  | "<="     				{ (* print_string "LEQ    \n";     *) LEQ }
+  | ">="				{ (* print_string "GEQ    \n";     *) GEQ }
+  | '='					{ (* print_string "EQ     \n";     *) EQ }
+  | alpha+ ('_' digit+)* as v		{ (* Printf.printf "VAR(%s)\n" (v);*) VAR(v) }
+  | scForm as f		   		{ (* Printf.printf "VAL(%s)\n" (f);*) VAL(float_of_string f) }
+  | '\n'(comment|'\n')*                 { (* print_string "EOL    \n";     *) EOL }
+  | eof                        		{ (* print_string "EOF    \n";     *) EOF }

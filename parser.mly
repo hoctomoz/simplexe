@@ -7,8 +7,33 @@ open Printf
 (* Set of variables *)
 module VariableSet = Set.Make(String)
 
+(******** Printing functions to check parsing ********)
+
+let printParsedExpression =
+        List.iter (fun (var, coeff) -> Printf.printf " %+f %s" (coeff) (var))
+
+let printParsedObjectiveFunction = printParsedExpression
+
+let printParsedConstraint = function
+        | (lowerBound, expression) -> printParsedExpression expression; Printf.printf " <= %f\n" (lowerBound)
+
+let printParsedConstraints = List.iter printParsedConstraint
+
+
+(******** Printing functions to check normalization ********)
+
 let printVariables = 
         Hashtbl.iter (fun var index -> Printf.printf "%s <-> %d\n" (var) (index))
+
+let printConstraints constraints =
+        Array.iteri (
+                fun i const ->
+                        Printf.printf "Constraint %d : " (i+1);
+                        Array.iteri (
+                                fun j coeff -> if j = 0 then Printf.printf "%+f " (coeff) else Printf.printf "%+f x%d " (coeff) (j)
+                        ) const;
+                        Printf.printf " = 0\n";
+        ) constraints
 
 let nameVariables variableList =
         let nvar = List.length variableList in
@@ -16,7 +41,7 @@ let nameVariables variableList =
         let variables = Array.make nvar "" in
         List.iteri (
                 fun i var ->
-                        Hashtbl.add variableTable var i;
+                        Hashtbl.add variableTable var (i+1);
                         variables.(i) <- var
                         ) variableList;
         (variables, variableTable)
@@ -34,14 +59,17 @@ let objectiveFunctionFromList objectiveList variableTable nvar ncons =
 let constraintsFromList constraintsList variableTable nvar ncons =
         let constraints = Array.make_matrix ncons (nvar + ncons + 2) 0. in
         List.iteri (
-                fun i (lowerBound, expression) ->
-                        constraints.(i).(0) <- -. lowerBound;
-                  List.iter (
-                          fun (var, coeff) ->
-                                  let varIndex = find variableTable var in
-                                  constraints.(i).(varIndex) <- constraints.(i).(varIndex) +. coeff
+                   fun i (lowerBound, expression) ->
+                        constraints.(i).(0) <- lowerBound;
+                        List.iter (
+                                  fun (var, coeff) ->
+                                        let varIndex = find variableTable var in
+                                        constraints.(i).(varIndex) <- constraints.(i).(varIndex) -. coeff
                                   ) expression;
+                        constraints.(i).(nvar + i + 1) <- -1.;
                   ) constraintsList;
+        (* TODO: remove. *)
+        (* printConstraints constraints; *)
         constraints
 
 let splitBounds boundsList =
@@ -67,7 +95,13 @@ let rec buildInstance max objectiveFunction constraints bounds variableList =
         then buildInstance true (minusExpression objectiveFunction) (revertConstraintsList constraints) (revertConstraintsList bounds) variableList
         else
                 begin
-
+                        (* TODO: remove. Left it for debugging reasons.
+                         * Printf.printf "Objective: \n";
+                         * printParsedObjectiveFunction objectiveFunction;
+                         * Printf.printf "\nConstraints: \n";
+                         * printParsedConstraints constraints;
+                         * Printf.printf "\nBounds: \n";
+                         * printParsedConstraints bounds; *)
                         let (variables, variableTable) = nameVariables variableList in
                         let (bounded, varConstraints) = splitBounds bounds in
                         let globalConstraints = varConstraints @ constraints in

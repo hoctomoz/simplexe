@@ -1,0 +1,17 @@
+MAXIMIZE
+
+x_1
+
+SUBJECT TO
+
+x_1 <= 5
+
+BOUNDS
+
+x_1 >= 0
+
+VARIABLES
+
+x_1
+
+END
