@@ -35,6 +35,9 @@ let printConstraints constraints =
                         Printf.printf " = 0\n";
         ) constraints
 
+
+(******** Conversion from parsed entry to simplex object ********)
+
 let nameVariables variableList =
         let nvar = List.length variableList in
         let variableTable = Hashtbl.create nvar in

@@ -11,24 +11,20 @@ object (this)
   (* Variables *)
   val nvar : int = nvarP
   val ncons : int = nconsP
-  val mutable objective : float array = Array.make (nvarP + nconsP + 2) 0.
-  val mutable constraints : float array array = Array.make_matrix nconsP (nvarP + nconsP + 2) 0.
-  (* On garde la constante en première position (matrix[i][0]) *)
+  val objective : float array = objectiveP
+  val constraints : float array array = constraintsP
+  (* On garde la constante en première position (matrix.(i).(0)) *)
   (* On rajoute une dernière colonne à la fin pour l'éventuelle première phase, sinon il faudrait redéfinir tout l'objet... *)
   val variables : int array = Array.init nconsP (fun x -> x + nvarP + 1)
   (* On repère quelle est la variable de chaque ligne que l'on assigne *)
 
   (* On conserve l'invariant suivant : forall i, constraints.(i) est normalisé suivant variables.(i) *)
 
-  (* Méthodes *)
-  (* Setters et getter à supprimer : juste pour tester, en attendant le parser
-     retirer le cara mutable aussi... *)
-  method setObjective o = objective <- o
-
-  method setConstraints m = constraints <- m
-
   method printConstraint i =
-    if constraints.(i).(variables.(i)) <> -1. then failwith "Erreur dans print_constraint : équation non normalisée";
+    if constraints.(i).(variables.(i)) <> -1.
+    then
+      let errorMsg = Printf.sprintf "Erreur dans print_constraint : équation non normalisée. constraints.(%d).(%d) = %f au lieu de -1." (i) (variables.(i)) (constraints.(i).(variables.(i))) in
+        failwith errorMsg;
     print_string "x"; print_int variables.(i); print_string " = ";
     print_float constraints.(i).(0);
     
