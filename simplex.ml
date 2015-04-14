@@ -23,8 +23,7 @@ object (this)
   method printConstraint i =
     if constraints.(i).(variables.(i)) <> -1.
     then
-      (let errorMsg = Printf.sprintf "Erreur dans print_constraint : équation non normalisée. constraints.(%d).(%d) = %f au lieu de -1." (i) (variables.(i)) (constraints.(i).(variables.(i))) in
-       failwith errorMsg);
+       failwith (Printf.sprintf "Erreur dans print_constraint : équation non normalisée. constraints.(%d).(%d) = %f au lieu de -1." (i) (variables.(i)) (constraints.(i).(variables.(i))));
     print_string "x"; print_int variables.(i); print_string " = ";
     print_float constraints.(i).(0);
     
