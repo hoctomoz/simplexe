@@ -9,7 +9,7 @@ Rôles des différents modules :
       - lexer.mll et parser.mly : lexer et parser du format d'entrée, qui mettent
       au passage celle-ci sous forme normale.
 
-      - linear.ml : fonctions sur les tableau utililes pour l'implémentation de
+      - linear.ml : fonctions sur les tableau utiles pour l'implémentation de
       l'algorithme du simplexe. Certaines d'entres elles font notamment l'hypothèse
       de notre choix de représentation des équations.
 
@@ -31,6 +31,6 @@ Rôles des différents modules :
 	dans le tableau "variables".
 	* Une équation est normalisée si le coefficient de sa variable à gauche vaut
 	"-1." (donc est égale à la somme des autres coefficients*variables). Certaines
-	fonctions de linear font cette hypothèse (mais la vérifie).
+	fonctions de linear font cette hypothèse (mais la vérifient).
 
       - main.ml : main du programme, reliant toutes les parties entre elles.
