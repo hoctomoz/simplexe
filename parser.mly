@@ -3,17 +3,21 @@
 
 open Simplex
 open Hashtbl
+open Printf
 (* Set of variables *)
 module VariableSet = Set.Make(String)
+
+let printVariables = 
+        Hashtbl.iter (fun var index -> Printf.printf "%s <-> %d\n" (var) (index))
 
 let nameVariables variableList =
         let nvar = List.length variableList in
         let variableTable = Hashtbl.create nvar in
         let variables = Array.make nvar "" in
         List.iteri (
-                fun i variable ->
-                        Hashtbl.add variableTable variable i;
-                        variables.(i) <- variable
+                fun i var ->
+                        Hashtbl.add variableTable var i;
+                        variables.(i) <- var
                         ) variableList;
         (variables, variableTable)
 
@@ -84,6 +88,7 @@ let rec buildInstance max objectiveFunction constraints bounds variableList =
 %token MIN, MAX
 %token ST, BDS, VARS
 %token COM
+%token END
 %token EOL, EOF            /* retour à la ligne */
 
 %start main             /* "start" signale le point d'entrée: c'est ici main */
@@ -92,7 +97,7 @@ let rec buildInstance max objectiveFunction constraints bounds variableList =
 %%
 main:
   |COM EOL main                         { $3 }
-  |objective EOL objectiveFunction EOL ST EOL constraints EOL BDS EOL bounds EOL VARS EOL variables EOF { buildInstance $1 $3 $7 $11 $15 }
+  |objective EOL objectiveFunction EOL ST EOL constraints BDS EOL bounds VARS EOL variables END EOL EOF { buildInstance $1 $3 $7 $10 $13 }
   ;
 
   objective:
