@@ -33,4 +33,10 @@ Rôles des différents modules :
 	"-1." (donc est égale à la somme des autres coefficients*variables). Certaines
 	fonctions de linear font cette hypothèse (mais la vérifient).
 
+        Par exemple, la contrainte x2 - x1 <= 5
+        correspond à x3 = 5 + x1 - x2
+        ie 5 + x1 - x2 - x3 = 0,
+        qui est représentée par : c  x1  x2  x3
+                                  5  1   -1  -1
+
       - main.ml : main du programme, reliant toutes les parties entre elles.
