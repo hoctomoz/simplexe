@@ -75,7 +75,7 @@ object (this)
       then s := !s
 	^" + "
 	^string_of_float(constraints.(i).(k))
-	^" * x_"^string_of_int(k);
+	^" \\times x_"^string_of_int(k);
     done;
     !s ^ "\\\\\n"
 
@@ -91,7 +91,7 @@ object (this)
 	s := !s
 	^" + "
 	^string_of_float(objective.(i))
-	^" * x_"^string_of_int(i);
+	^" \\times x_"^string_of_int(i);
       end;
     done;
     !s ^ "\n\\end{cases}\n\\end{equation*}\n\n";
