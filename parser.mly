@@ -166,6 +166,8 @@ main:
   ;
 
   expression:
+  |PLUS atomicExpression                { [$2] }
+  |MINUS atomicExpression               { let (var, coeff) = $2 in [(var, -.coeff)] }
   |expression PLUS atomicExpression     {$3 :: $1 }
   |expression MINUS atomicExpression    { let (var, coeff) = $3 in (var, -.coeff) :: $1 }
   |atomicExpression                     { [$1] }
