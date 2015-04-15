@@ -22,7 +22,9 @@ object (this)
   (* On conserve l'invariant suivant : forall i, constraints.(i) est normalisé suivant variables.(i) *)
 
   method getName varIndex =
-    if varIndex > nvar
+    if varIndex = nvar + ncons + 1
+    then "x_0"
+    else if varIndex > nvar
     then Printf.sprintf "x_%d" varIndex
     else variableName.(varIndex-1)
 
@@ -37,7 +39,7 @@ object (this)
     
     for k = 1 to nvar + ncons + 1 do
       if k <> variables.(i) && constraints.(i).(k) <> 0. then begin
-        Printf.printf " + %f*%s" (constraints.(i).(k)) (this#getName k)
+        Printf.printf " %+f*%s" (constraints.(i).(k)) (this#getName k)
 	(* TODO: remove
   * print_string " + ";
 	print_float constraints.(i).(k);
@@ -58,9 +60,7 @@ object (this)
     print_float (objective.(0));
     for i = 1 to nvar + ncons + 1 do
       if objective.(i) <> 0. then begin
-	print_string " + ";
-	print_float (objective.(i));
-	print_string "*x"; print_int i;
+        Printf.printf " %+f*%s" (objective.(i)) (this#getName i)
       end;
     done;
     print_string "\n\n";
