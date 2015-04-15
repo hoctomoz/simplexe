@@ -28,18 +28,27 @@ object (this)
     then Printf.sprintf "x_%d" varIndex
     else variableName.(varIndex-1)
 
+  method toString coeff varIndex =
+    let variable = this#getName varIndex in
+    if coeff = 1. then Printf.sprintf " + %s" variable
+    else if coeff = -.1. then Printf.sprintf " - %s" variable
+    else if coeff > 0. then Printf.sprintf " + %G*%s" coeff variable
+    else if coeff < 0. then Printf.sprintf " - %G*%s" (-. coeff) variable
+    else ""
+
   method printConstraint i =
     if constraints.(i).(variables.(i)) <> -1.
     then
        failwith (Printf.sprintf "Erreur dans print_constraint : équation non normalisée. constraints.(%d).(%d) = %f au lieu de -1." (i) (variables.(i)) (constraints.(i).(variables.(i))));
-    Printf.printf "%s = %f" (this#getName variables.(i)) (constraints.(i).(0));
+    Printf.printf "%s =" (this#getName variables.(i));
+    if constraints.(i).(0) <> 0. then  Printf.printf " %G" (constraints.(i).(0));
     (* TODO: remove.
      * print_string "x"; print_int variables.(i); print_string " = ";
     print_float constraints.(i).(0); *)
     
     for k = 1 to nvar + ncons + 1 do
-      if k <> variables.(i) && constraints.(i).(k) <> 0. then begin
-        Printf.printf " %+f*%s" (constraints.(i).(k)) (this#getName k)
+      if k <> variables.(i) then begin
+        print_string (this#toString (constraints.(i).(k)) k)
 	(* TODO: remove
   * print_string " + ";
 	print_float constraints.(i).(k);
@@ -57,11 +66,9 @@ object (this)
     print_string "-----------------";
     print_newline();
     print_string "z = ";
-    print_float (objective.(0));
+    if objective.(0) <> 0. then print_float (objective.(0));
     for i = 1 to nvar + ncons + 1 do
-      if objective.(i) <> 0. then begin
-        Printf.printf " %+f*%s" (objective.(i)) (this#getName i)
-      end;
+      print_string (this#toString (objective.(i)) i)
     done;
     print_string "\n\n";
 
