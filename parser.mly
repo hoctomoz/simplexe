@@ -25,7 +25,7 @@ let printParsedConstraints = List.iter printParsedConstraint
 let printVariables = 
         Hashtbl.iter (fun var index -> Printf.printf "%s <-> %d\n" (var) (index))
 
-let printConstraints constraints =
+let printParserConstraints constraints =
         Array.iteri (
                 fun i const ->
                         Printf.printf "Constraint %d : " (i+1);
@@ -38,15 +38,17 @@ let printConstraints constraints =
 
 (******** Conversion from parsed entry to simplex object ********)
 
-let nameVariables variableList =
-        let nvar = List.length variableList in
+let nameVariables variableSet =
+        let nvar = VariableSet.cardinal variableSet in
         let variableTable = Hashtbl.create nvar in
         let variables = Array.make nvar "" in
-        List.iteri (
-                fun i var ->
-                        Hashtbl.add variableTable var (i+1);
-                        variables.(i) <- var
-                        ) variableList;
+        let current_index = ref 1 in
+        VariableSet.iter (
+                fun var ->
+                        Hashtbl.add variableTable var (!current_index);
+                        variables.(!current_index - 1) <- var;
+                        incr current_index;
+                        ) variableSet;
         (variables, variableTable)
 
 let objectiveFunctionFromList objectiveList variableTable nvar ncons =
@@ -72,7 +74,7 @@ let constraintsFromList constraintsList variableTable nvar ncons =
                         constraints.(i).(nvar + i + 1) <- -1.;
                   ) constraintsList;
         (* TODO: remove. *)
-        (* printConstraints constraints; *)
+        (* printParserConstraints constraints; *)
         constraints
 
 let splitBounds boundsList =
@@ -93,9 +95,9 @@ let minusExpression expression =
 let revertConstraintsList constraintsList =
         List.map (fun (lowerBound, expression) -> (-.lowerBound, minusExpression expression)) constraintsList
 
-let rec buildInstance max objectiveFunction constraints bounds variableList =
+let rec buildInstance max objectiveFunction constraints bounds variableSet =
         if not max
-        then buildInstance true (minusExpression objectiveFunction) (revertConstraintsList constraints) (revertConstraintsList bounds) variableList
+        then buildInstance true (minusExpression objectiveFunction) (revertConstraintsList constraints) (revertConstraintsList bounds) variableSet
         else
                 begin
                         (* TODO: remove. Left it for debugging reasons.
@@ -105,7 +107,7 @@ let rec buildInstance max objectiveFunction constraints bounds variableList =
                          * printParsedConstraints constraints;
                          * Printf.printf "\nBounds: \n";
                          * printParsedConstraints bounds; *)
-                        let (variables, variableTable) = nameVariables variableList in
+                        let (variables, variableTable) = nameVariables variableSet in
                         let (bounded, varConstraints) = splitBounds bounds in
                         let globalConstraints = varConstraints @ constraints in
                         let ncons = List.length globalConstraints in
@@ -180,6 +182,6 @@ main:
   ;
 
   variables:
-  |VAR EOL variables                    { $1 :: $3 }
-  |VAR EOL                              { [$1] }
+  |VAR EOL variables                    { VariableSet.add $1 $3 }
+  |VAR EOL                              { VariableSet.singleton $1 }
   ;
