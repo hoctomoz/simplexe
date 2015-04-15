@@ -5,7 +5,7 @@ type solution = Opt | Empty | Unbound;;
 let latexPrelude = "\\documentclass{article}\n\n\\usepackage[utf8]{inputenc}\n\\usepackage{amsmath}\n\n\\begin{document}\n\n";;
 let latexPostlude = "\\end{document}";;
 
-class simplex nvarP nconsP constraintsP objectiveP =
+class simplex nvarP nconsP constraintsP objectiveP variableNameP =
 object (this)
 
   (* Variables *)
@@ -17,22 +17,32 @@ object (this)
   (* On rajoute une dernière colonne à la fin pour l'éventuelle première phase, sinon il faudrait redéfinir tout l'objet... *)
   val variables : int array = Array.init nconsP (fun x -> x + nvarP + 1)
   (* On repère quelle est la variable de chaque ligne que l'on assigne *)
+  val variableName : string array = variableNameP
 
   (* On conserve l'invariant suivant : forall i, constraints.(i) est normalisé suivant variables.(i) *)
+
+  method getName varIndex =
+    if varIndex > nvar
+    then Printf.sprintf "x_%d" varIndex
+    else variableName.(varIndex-1)
 
   method printConstraint i =
     if constraints.(i).(variables.(i)) <> -1.
     then
        failwith (Printf.sprintf "Erreur dans print_constraint : équation non normalisée. constraints.(%d).(%d) = %f au lieu de -1." (i) (variables.(i)) (constraints.(i).(variables.(i))));
-    print_string "x"; print_int variables.(i); print_string " = ";
-    print_float constraints.(i).(0);
+    Printf.printf "%s = %f" (this#getName variables.(i)) (constraints.(i).(0));
+    (* TODO: remove.
+     * print_string "x"; print_int variables.(i); print_string " = ";
+    print_float constraints.(i).(0); *)
     
     for k = 1 to nvar + ncons + 1 do
       if k <> variables.(i) && constraints.(i).(k) <> 0. then begin
-	print_string " + ";
+        Printf.printf " + %f*%s" (constraints.(i).(k)) (this#getName k)
+	(* TODO: remove
+  * print_string " + ";
 	print_float constraints.(i).(k);
 	print_string "*x";
-	print_int k;
+	print_int k;*)
       end;
     done;
 

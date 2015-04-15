@@ -132,6 +132,7 @@ let rec buildInstance max objectiveFunction constraints bounds variableSet =
                         new Simplex.simplex nvar ncons
                                 (constraintsFromList globalConstraints variableTable nvar ncons)
                                 (objectiveFunctionFromList objectiveFunction variableTable nvar ncons)
+                                variables
                 end
 
         %}

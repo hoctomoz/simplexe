@@ -28,7 +28,7 @@ rule token = parse    (* la "fonction" aussi s'appelle token .. *)
   | "<="     				{ (* print_string "LEQ    \n";     *) LEQ }
   | ">="				{ (* print_string "GEQ    \n";     *) GEQ }
   | '='					{ (* print_string "EQ     \n";     *) EQ }
-  | alpha+ ('_' digit+)* as v		{ (* Printf.printf "VAR(%s)\n" (v);*) VAR(v) }
+  | alpha+ ('_'? digit+)* as v		{ (* Printf.printf "VAR(%s)\n" (v);*) VAR(v) }
   | scForm as f		   		{ (* Printf.printf "VAL(%s)\n" (f);*) VAL(float_of_string f) }
   | '\n'(comment|'\n')*                 { (* print_string "EOL    \n";     *) EOL }
   | eof                        		{ (* print_string "EOF    \n";     *) EOF }
