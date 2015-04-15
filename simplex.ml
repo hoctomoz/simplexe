@@ -11,7 +11,7 @@ object (this)
   (* Variables *)
   val nvar : int = nvarP
   val ncons : int = nconsP
-  val objective : float array = objectiveP
+  val mutable objective : float array = objectiveP
   val constraints : float array array = constraintsP
   (* On garde la constante en première position (matrix.(i).(0)) *)
   (* On rajoute une dernière colonne à la fin pour l'éventuelle première phase, sinon il faudrait redéfinir tout l'objet... *)
@@ -42,9 +42,7 @@ object (this)
     for i = 0 to ncons-1 do
       this#printConstraint i;
     done;
-    for i = 0 to nvar + ncons + 1 do
-      print_string "-------";
-    done;
+    print_string "-----------------";
     print_newline();
     print_string "z = ";
     print_float (objective.(0));
@@ -61,8 +59,7 @@ object (this)
     if constraints.(i).(variables.(i)) <> -1. then failwith "Erreur dans print_constraint : équation non normalisée";
     let s = ref "" in
     s := !s
-    ^"x_"^string_of_int(variables.(i))
-    ^" & = "
+    ^"x_{"^string_of_int(variables.(i))^"} & = "
     ^string_of_float(constraints.(i).(0));
     
     for k = 1 to nvar + ncons + 1 do
@@ -70,7 +67,7 @@ object (this)
       then s := !s
 	^" + "
 	^string_of_float(constraints.(i).(k))
-	^" \\times x_"^string_of_int(k);
+	^" \\times x_{"^string_of_int(k)^"}";
     done;
     !s ^ "\\\\\n"
 
@@ -86,7 +83,7 @@ object (this)
 	s := !s
 	^" + "
 	^string_of_float(objective.(i))
-	^" \\times x_"^string_of_int(i);
+	^" \\times x_{"^string_of_int(i)^"}";
       end;
     done;
     !s ^ "\n\\end{cases}\n\\end{equation*}\n\n";
@@ -119,9 +116,38 @@ object (this)
 
   method printCertificate () = print_array (this#certificate()); print_newline();
 
+  method firstPhaseNeeded () = negativeConstant constraints
+
   method firstPhase print =
-    (* TODO *)
-    true (* renvoie true si pas empty *)
+    let z = Array.copy objective in
+    let w = Array.make (nvar+ncons+2) 0. in
+
+    let index0 = nvar + ncons + 1 in (* Indice de x0 *)
+
+    w.(index0) <- -1.; (* Maximiser -x0 *)
+    for i = 0 to ncons-1 do
+      constraints.(i).(index0) <- 1.;
+    done;
+    objective <- w; (* On a fini de mettre en place la version complémentaire *)
+
+    this#printWhat print;
+
+    this#switch index0 (leavingx0 constraints); (* Première étape (pivot illégal) *)
+
+    this#printWhat print;
+
+    if this#secondPhase print <> Opt then failwith "Cas impossible dans firstPhase : Unbound ou Empty après rajout de x0..." (* le résultat est toujours Opt *);
+
+    if this#evaluate () = 0. then begin
+      objective <- z;
+      for i = 0 to ncons-1 do
+	constraints.(i).(index0) <- 0.;
+      done;
+      true
+    end
+    else false
+	  
+
 
   method switch k i =
     (* Échange la variable entrante k avec la ième contrainte, conserve l'invariant de normalisation *)
@@ -143,8 +169,16 @@ object (this)
   method solve print =
     if print then print_string latexPrelude;
     this#printWhat print;
-    if this#firstPhase print then this#secondPhase print
-    else Empty;
+
+    let sol = ref Opt in
+
+    if this#firstPhaseNeeded () then
+      if this#firstPhase print then sol := this#secondPhase print
+      else sol := Empty
+    else sol := this#secondPhase print;
+
     if print then print_string latexPostlude;
+
+    !sol
 
 end;;
