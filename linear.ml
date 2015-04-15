@@ -77,5 +77,3 @@ let leavingx0 m =
   if (!indice = -1) then failwith "Cas impossible dans leavingx0 : la constante minimale doit être négative";
 
   !indice
-
-module Test = Array;;
