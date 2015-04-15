@@ -38,9 +38,20 @@ let printParserConstraints constraints =
 
 (******** Conversion from parsed entry to simplex object ********)
 
-let addUnboundedVariables variableSet boundedSet =
-        let unboundedSet = VariableSet.diff variableSet boundedSet in
+let addUnboundedVariables variableSet unboundedSet =
         VariableSet.fold (fun unboundedVar -> VariableSet.add (unboundedVar ^ "-")) unboundedSet variableSet
+
+
+let rec replaceUnboundedVariables unboundedSet = function
+        | [] -> []
+        | (var, coeff)::t ->
+                        let partialConstraint = replaceUnboundedVariables unboundedSet t in
+                        if VariableSet.mem var unboundedSet
+                        then (var, coeff)::(var^"-", -.coeff)::partialConstraint
+                        else (var, coeff)::partialConstraint
+
+let handleUnboundedVariables unboundedSet =
+        List.map (fun (lowerBound, expression) -> (lowerBound, replaceUnboundedVariables unboundedSet expression))
 
 let nameVariables variableSet =
         let nvar = VariableSet.cardinal variableSet in
@@ -112,9 +123,10 @@ let rec buildInstance max objectiveFunction constraints bounds variableSet =
                          * Printf.printf "\nBounds: \n";
                          * printParsedConstraints bounds; *)
                         let (boundedSet, varConstraints) = splitBounds bounds in
-                        let globalVariableSet = addUnboundedVariables variableSet boundedSet in
+                        let unboundedSet = VariableSet.diff variableSet boundedSet in
+                        let globalVariableSet = addUnboundedVariables variableSet unboundedSet in
                         let (variables, variableTable) = nameVariables globalVariableSet in
-                        let globalConstraints = varConstraints @ constraints in
+                        let globalConstraints = handleUnboundedVariables unboundedSet (varConstraints @ constraints) in
                         let ncons = List.length globalConstraints in
                         let nvar = Hashtbl.length variableTable in
                         new Simplex.simplex nvar ncons
