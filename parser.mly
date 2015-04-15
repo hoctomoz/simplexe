@@ -38,6 +38,10 @@ let printParserConstraints constraints =
 
 (******** Conversion from parsed entry to simplex object ********)
 
+let addUnboundedVariables variableSet boundedSet =
+        let unboundedSet = VariableSet.diff variableSet boundedSet in
+        VariableSet.fold (fun unboundedVar -> VariableSet.add (unboundedVar ^ "-")) unboundedSet variableSet
+
 let nameVariables variableSet =
         let nvar = VariableSet.cardinal variableSet in
         let variableTable = Hashtbl.create nvar in
@@ -107,8 +111,9 @@ let rec buildInstance max objectiveFunction constraints bounds variableSet =
                          * printParsedConstraints constraints;
                          * Printf.printf "\nBounds: \n";
                          * printParsedConstraints bounds; *)
-                        let (variables, variableTable) = nameVariables variableSet in
-                        let (bounded, varConstraints) = splitBounds bounds in
+                        let (boundedSet, varConstraints) = splitBounds bounds in
+                        let globalVariableSet = addUnboundedVariables variableSet boundedSet in
+                        let (variables, variableTable) = nameVariables globalVariableSet in
                         let globalConstraints = varConstraints @ constraints in
                         let ncons = List.length globalConstraints in
                         let nvar = Hashtbl.length variableTable in
