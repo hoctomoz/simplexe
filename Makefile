@@ -1,8 +1,8 @@
 all: 
-	ocamlbuild -yaccflag -v -lib unix main.native; ln -fs main.native toto
+	ocamlbuild -yaccflag -v -libs unix,str main.native; ln -fs main.native toto
 
 print:
-	ocamlbuild -yaccflag -v -lib unix print.native
+	ocamlbuild -yaccflag -v -libs unix,str print.native
 
 byte:
 	ocamlbuild -yaccflag -v main.byte
