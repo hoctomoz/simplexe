@@ -2,30 +2,7 @@
         (* --- préambule: ici du code Caml --- *)
 
 open Simplex
-open Hashtbl
-open Printf
 open InstanceBuilder
-(* Set of variables *)
-module VariableSet = Set.Make(String)
-
-
-let rec buildInstance max objectiveFunction constraints bounds variableSet =
-        if not max
-        then buildInstance true (minusExpression objectiveFunction) (revertConstraintsList constraints) (revertConstraintsList bounds) variableSet
-        else
-                begin
-                        let (boundedSet, varConstraints) = splitBounds bounds in
-                        let unboundedSet = VariableSet.diff variableSet boundedSet in
-                        let globalVariableSet = addUnboundedVariables variableSet unboundedSet in
-                        let (variables, variableTable) = nameVariables globalVariableSet in
-                        let globalConstraints = handleUnboundedVariables unboundedSet (varConstraints @ constraints) in
-                        let ncons = List.length globalConstraints in
-                        let nvar = Hashtbl.length variableTable in
-                        new Simplex.simplex nvar ncons
-                                (constraintsFromList globalConstraints variableTable nvar ncons)
-                                (objectiveFunctionFromList objectiveFunction variableTable nvar ncons)
-                                variables
-                end
 
         %}
 /* description des lexèmes */
@@ -46,7 +23,7 @@ let rec buildInstance max objectiveFunction constraints bounds variableSet =
 %%
 main:
   |COM EOL main                         { $3 }
-  |objective EOL objectiveFunction EOL ST EOL constraints BDS EOL bounds VARS EOL variables END EOL EOF { buildInstance $1 $3 $7 $10 $13 }
+  |objective EOL objectiveFunction EOL ST EOL constraints BDS EOL bounds VARS EOL variables END EOL EOF { new Simplex.simplex $1 $3 $7 $10 $13 }
   ;
 
   objective:

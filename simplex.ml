@@ -1,4 +1,5 @@
 open Linear;;
+open InstanceBuilder;;
 
 type solution = Opt | Empty | Unbound;;
 
@@ -7,21 +8,36 @@ let latexPostlude = "\\end{document}";;
 
 let stringOfConstant constant =
   if constant = 0. then ""
-  else " "^(string_of_float constant)
+  else (Printf.sprintf " %G" constant)
 
-class simplex nvarP nconsP constraintsP objectiveP variableNameP =
+let standardize max objectiveFunction constraints bounds =
+  if not max
+  then (minusExpression objectiveFunction, revertConstraintsList constraints, revertConstraintsList bounds)
+  else (objectiveFunction, constraints, bounds)
+
+class simplex maxP objectiveFunctionP constraintsP boundsP variableSetP (*nvarP nconsP constraintsP objectiveP variableNameP*) =
+
+      let (objectiveFunction, constraints, bounds) = standardize maxP objectiveFunctionP constraintsP boundsP in
+      let (boundedSet, varConstraints) = splitBounds bounds in
+      let unboundedSet = VariableSet.diff variableSetP boundedSet in
+      let globalVariableSet = addUnboundedVariables variableSetP unboundedSet in
+      let (variableName, variableTable) = nameVariables globalVariableSet in
+      let globalConstraints = handleUnboundedVariables unboundedSet (varConstraints @ constraints) in
+      let nconsP = List.length globalConstraints in
+      let nvarP = Hashtbl.length variableTable in
+
 object (this)
 
   (* Variables *)
   val nvar : int = nvarP
   val ncons : int = nconsP
-  val mutable objective : float array = objectiveP
-  val constraints : float array array = constraintsP
+  val mutable objective : float array = objectiveFunctionFromList objectiveFunction variableTable nvarP nconsP
+  val constraints : float array array = constraintsFromList globalConstraints variableTable nvarP nconsP
   (* On garde la constante en première position (matrix.(i).(0)) *)
   (* On rajoute une dernière colonne à la fin pour l'éventuelle première phase, sinon il faudrait redéfinir tout l'objet... *)
   val variables : int array = Array.init nconsP (fun x -> x + nvarP + 1)
   (* On repère quelle est la variable de chaque ligne que l'on assigne *)
-  val variableName : string array = variableNameP
+  val variableName : string array = variableName
 
   (* On conserve l'invariant suivant : forall i, constraints.(i) est normalisé suivant variables.(i) *)
 
