@@ -209,7 +209,16 @@ object (this)
       else sol := Empty
     else sol := this#secondPhase print;
 
-    if print then print_string latexPostlude;
+
+    begin
+      match (!sol) with
+        | Empty -> Printf.printf "Domain is empty."
+        | Unbound -> Printf.printf "Domain is unbounded."
+        | Opt -> Printf.printf "Optimal solution is %G.\n\n" (objective.(0));
+    end;
+
+     if print then
+       print_string latexPostlude;
 
     !sol
 
