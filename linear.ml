@@ -6,7 +6,9 @@ let normalize i a =
 
 let substitute i a b =
 (* Substitue la variable i de a par l'équation donnée dans b *)
-  if b.(i) <> -1. then failwith "Erreur dans substitute : équation non normalisée";
+  (* WARNING: partial bug fix. May have to investigate more. *)
+  (* if b.(i) <> -1. then failwith "Erreur dans substitute : équation non normalisée"; *)
+  if b.(i) < -1.00000001 || b.(i) > -0.99999999 then failwith "Erreur dans substitute : équation non normalisée";
   
   let coeff = a.(i) in
   Array.iteri (fun k -> fun x -> a.(k) <- x +. coeff*.b.(k)) a;;
