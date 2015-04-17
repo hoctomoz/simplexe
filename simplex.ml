@@ -10,19 +10,19 @@ let stringOfConstant constant =
   if constant = 0. then ""
   else (Printf.sprintf " %G" constant)
 
-let standardize max objectiveFunction constraints bounds =
+let standardize max objectiveFunction =
   if not max
-  then (minusExpression objectiveFunction, revertConstraintsList constraints, revertConstraintsList bounds)
-  else (objectiveFunction, constraints, bounds)
+  then minusExpression objectiveFunction
+  else objectiveFunction
 
-class simplex maxP objectiveFunctionP constraintsP boundsP variableSetP (*nvarP nconsP constraintsP objectiveP variableNameP*) =
+class simplex maxP objectiveFunctionP constraintsP boundsP variableSetP =
 
-      let (objectiveFunction, constraints, bounds) = standardize maxP objectiveFunctionP constraintsP boundsP in
-      let (boundedSet, varConstraints) = splitBounds bounds in
+      let objectiveFunction = standardize maxP objectiveFunctionP in
+      let (boundedSet, varConstraints) = splitBounds boundsP in
       let unboundedSet = VariableSet.diff variableSetP boundedSet in
       let globalVariableSet = addUnboundedVariables variableSetP unboundedSet in
       let (variableName, variableTable) = nameVariables globalVariableSet in
-      let globalConstraints = handleUnboundedVariables unboundedSet (varConstraints @ constraints) in
+      let globalConstraints = handleUnboundedVariables unboundedSet (varConstraints @ constraintsP) in
       let nconsP = List.length globalConstraints in
       let nvarP = Hashtbl.length variableTable in
 
@@ -212,8 +212,8 @@ object (this)
 
     begin
       match (!sol) with
-        | Empty -> Printf.printf "Domain is empty."
-        | Unbound -> Printf.printf "Domain is unbounded."
+        | Empty -> Printf.printf "Domain is empty.\n\n"
+        | Unbound -> Printf.printf "Domain is unbounded.\n\n"
         | Opt -> Printf.printf "Optimal solution is %G.\n\n" (objective.(0));
     end;
 
