@@ -17,12 +17,11 @@ let standardize max objectiveFunction =
 
 class simplex maxP objectiveFunctionP constraintsP boundsP variableSetP =
 
-      let objectiveFunction = standardize maxP objectiveFunctionP in
       let (boundedSet, varConstraints) = splitBounds boundsP in
       let unboundedSet = VariableSet.diff variableSetP boundedSet in
       let globalVariableSet = addUnboundedVariables variableSetP unboundedSet in
       let (variableName, variableTable) = nameVariables globalVariableSet in
-      let globalConstraints = handleUnboundedVariables unboundedSet (varConstraints @ constraintsP) in
+      let (objectiveFunction, globalConstraints) = handleUnboundedVariables unboundedSet (standardize maxP objectiveFunctionP) (varConstraints @ constraintsP) in
       let nconsP = List.length globalConstraints in
       let nvarP = Hashtbl.length variableTable in
 
@@ -214,7 +213,9 @@ object (this)
       match (!sol) with
         | Empty -> Printf.printf "Domain is empty.\n\n"
         | Unbound -> Printf.printf "Domain is unbounded.\n\n"
-        | Opt -> Printf.printf "Optimal solution is %G.\n\n" (objective.(0));
+        | Opt -> print_string "Optimal solution is ";
+                 if maxP then Printf.printf "%G.\n\n" (objective.(0))
+                 else Printf.printf "%G.\n\n" (-.objective.(0))
     end;
 
      if print then

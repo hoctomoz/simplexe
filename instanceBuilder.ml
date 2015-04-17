@@ -14,8 +14,8 @@ let rec replaceUnboundedVariables unboundedSet = function
                         then (var, coeff)::(var^"-", -.coeff)::partialConstraint
                         else (var, coeff)::partialConstraint
 
-let handleUnboundedVariables unboundedSet =
-        List.map (fun (lowerBound, expression) -> (lowerBound, replaceUnboundedVariables unboundedSet expression))
+let handleUnboundedVariables unboundedSet objectiveFunction constraints =
+        (replaceUnboundedVariables unboundedSet objectiveFunction, List.map (fun (lowerBound, expression) -> (lowerBound, replaceUnboundedVariables unboundedSet expression)) constraints)
 
 let nameVariables variableSet =
         let nvar = VariableSet.cardinal variableSet in

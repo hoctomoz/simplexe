@@ -13,7 +13,6 @@ open InstanceBuilder
 %token LEQ, GEQ, EQ
 %token MIN, MAX
 %token ST, BDS, VARS
-%token COM
 %token END
 %token EOL, EOF            /* retour à la ligne */
 
@@ -22,7 +21,7 @@ open InstanceBuilder
 
 %%
 main:
-  |COM EOL main                         { $3 }
+  |EOL main                             { $2 }
   |objective EOL objectiveFunction EOL ST EOL constraints BDS EOL bounds VARS EOL variables END EOL EOF { new Simplex.simplex $1 $3 $7 $10 $13 }
   ;
 
