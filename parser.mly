@@ -23,6 +23,7 @@ open InstanceBuilder
 main:
   |EOL main                             { $2 }
   |objective EOL objectiveFunction EOL ST EOL constraints BDS EOL bounds VARS EOL variables END EOL EOF { new Simplex.simplex $1 $3 $7 $10 $13 }
+  |objective EOL objectiveFunction EOL ST EOL constraints BDS EOL VARS EOL variables END EOL EOF { new Simplex.simplex $1 $3 $7 [] $12 }
   ;
 
   objective:
