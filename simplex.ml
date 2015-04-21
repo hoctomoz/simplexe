@@ -72,7 +72,7 @@ object (this)
       else failwith "Erreur dans toLatex : l'argument n'est pas un vrai float"
 
   method printConstraint i =
-    if constraints.(i).(variables.(i)) <> -1.
+    if abs_float(constraints.(i).(variables.(i)) +. 1.) > epsilon
     then
        failwith "Erreur dans print_constraint : équation non normalisée.";
     Printf.printf "%s =%s" (this#getName variables.(i)) (stringOfConstant constraints.(i).(0));
