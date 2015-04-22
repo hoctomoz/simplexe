@@ -16,5 +16,3 @@ VARIABLES
 
 x
 y
-
-END

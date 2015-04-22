@@ -13,5 +13,3 @@ x_1 >= 0
 VARIABLES
 
 x_1
-
-END

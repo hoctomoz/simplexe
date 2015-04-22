@@ -17,5 +17,3 @@ VARIABLES
 
 x_1
 x_2
-
-END

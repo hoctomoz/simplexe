@@ -19,5 +19,3 @@ VARIABLES
 x_1
 x_2
 x_3
-
-END

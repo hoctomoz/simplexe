@@ -24,7 +24,6 @@ rule token = parse    (* la "fonction" aussi s'appelle token .. *)
   | "SUBJECT TO"			{ (* print_string "ST     \n";     *) ST }
   | "BOUNDS" 				{ (* print_string "BDS    \n";     *) BDS }
   | "VARIABLES"				{ (* print_string "VARS   \n";     *) VARS }
-  | "END"                               { (* print_string "END    \n";     *) END }
   | "<="     				{ (* print_string "LEQ    \n";     *) LEQ }
   | ">="				{ (* print_string "GEQ    \n";     *) GEQ }
   | '='					{ (* print_string "EQ     \n";     *) EQ }
