@@ -17,13 +17,13 @@ let standardize max objectiveFunction =
 
 class simplex maxP objectiveFunctionP constraintsP boundsP variableSetP =
 
-      let (boundedSet, varConstraints) = splitBounds boundsP in
-      let unboundedSet = VariableSet.diff variableSetP boundedSet in
-      let globalVariableSet = addUnboundedVariables variableSetP unboundedSet in
-      let (variableName, variableTable) = nameVariables globalVariableSet in
-      let (objectiveFunction, globalConstraints) = handleUnboundedVariables unboundedSet (standardize maxP objectiveFunctionP) (varConstraints @ constraintsP) in
-      let nconsP = List.length globalConstraints in
-      let nvarP = Hashtbl.length variableTable in
+  let (boundedSet, varConstraints) = splitBounds boundsP in
+  let unboundedSet = VariableSet.diff variableSetP boundedSet in
+  let globalVariableSet = addUnboundedVariables variableSetP unboundedSet in
+  let (variableName, variableTable) = nameVariables globalVariableSet in
+  let (objectiveFunction, globalConstraints) = handleUnboundedVariables unboundedSet (standardize maxP objectiveFunctionP) (varConstraints @ constraintsP) in
+  let nconsP = List.length globalConstraints in
+  let nvarP = Hashtbl.length variableTable in
 
 object (this)
 
@@ -49,12 +49,12 @@ object (this)
 
   method toString coeff varIndex =
     let variable = this#getName varIndex in
-      if coeff = 0. then ""
-      else if coeff = 1. then Printf.sprintf " + %s" variable
-      else if coeff = -.1. then Printf.sprintf " - %s" variable
-      else if coeff > 0. then Printf.sprintf " + %G*%s" coeff variable
-      else if coeff < 0. then Printf.sprintf " - %G*%s" (-. coeff) variable
-      else failwith "Erreur dans toString : l'argument n'est pas un vrai float"
+    if coeff = 0. then ""
+    else if coeff = 1. then Printf.sprintf " + %s" variable
+    else if coeff = -.1. then Printf.sprintf " - %s" variable
+    else if coeff > 0. then Printf.sprintf " + %G*%s" coeff variable
+    else if coeff < 0. then Printf.sprintf " - %G*%s" (-. coeff) variable
+    else failwith "Erreur dans toString : l'argument n'est pas un vrai float"
 
   method latexName varIndex =
     let variable = this#getName varIndex in
@@ -64,17 +64,17 @@ object (this)
 
   method toLatex coeff varIndex =
     let variable = this#latexName varIndex in
-      if coeff = 0. then ""
-      else if coeff = 1. then Printf.sprintf " + %s" variable
-      else if coeff = -.1. then Printf.sprintf " - %s" variable
-      else if coeff > 0. then Printf.sprintf " + %G \\times %s" coeff variable
-      else if coeff < 0. then Printf.sprintf " - %G \\times %s" (-. coeff) variable
-      else failwith "Erreur dans toLatex : l'argument n'est pas un vrai float"
+    if coeff = 0. then ""
+    else if coeff = 1. then Printf.sprintf " + %s" variable
+    else if coeff = -.1. then Printf.sprintf " - %s" variable
+    else if coeff > 0. then Printf.sprintf " + %G \\times %s" coeff variable
+    else if coeff < 0. then Printf.sprintf " - %G \\times %s" (-. coeff) variable
+    else failwith "Erreur dans toLatex : l'argument n'est pas un vrai float"
 
   method printConstraint i =
-    if abs_float(constraints.(i).(variables.(i)) +. 1.) > epsilon
+    if not(almostNaught(constraints.(i).(variables.(i)) +. 1.))
     then
-       failwith "Erreur dans print_constraint : équation non normalisée.";
+      failwith "Erreur dans print_constraint : équation non normalisée.";
     Printf.printf "%s =%s" (this#getName variables.(i)) (stringOfConstant constraints.(i).(0));
     
     for k = 1 to nvar + ncons + 1 do
@@ -169,7 +169,7 @@ object (this)
 
     if this#secondPhase print <> Opt then failwith "Cas impossible dans firstPhase : Unbound ou Empty après rajout de x0..." (* le résultat est toujours Opt *);
 
-    if this#evaluate () = 0. then begin
+    if almostNaught(this#evaluate ()) then begin
       objective <- z;
       for i = 0 to ncons-1 do
 	constraints.(i).(index0) <- 0.;
@@ -177,7 +177,7 @@ object (this)
       true
     end
     else false
-	  
+      
 
 
   method switch k i =
@@ -199,27 +199,47 @@ object (this)
 
   method solve print =
     if print then print_string latexPrelude;
+    print_string "Beginning of the simplex algorithm\n\n";
     this#printWhat print;
 
     let sol = ref Opt in
 
     if this#firstPhaseNeeded () then
-      if this#firstPhase print then sol := this#secondPhase print
-      else sol := Empty
-    else sol := this#secondPhase print;
-
+      begin
+	print_string "First Phase\n\n";
+	if this#firstPhase print then
+	  begin
+	    print_string "End of the First Phase\n\n";
+	    print_string "Second Phase\n\n";
+	    sol := this#secondPhase print;
+	    print_string "End of the Second Phase\n\n";
+	  end 
+	else 
+	  begin
+	    sol := Empty;
+	    print_string "End of the First Phase\n\n";
+	  end
+      end
+    else
+      begin
+	print_string "Second Phase\n\n";
+	sol := this#secondPhase print;
+	print_string "End of the Second Phase\n\n";
+      end;
 
     begin
       match (!sol) with
-        | Empty -> Printf.printf "Domain is empty.\n\n"
-        | Unbound -> Printf.printf "Domain is unbounded.\n\n"
-        | Opt -> print_string "Optimal solution is ";
-                 if maxP then Printf.printf "%G.\n\n" (objective.(0))
-                 else Printf.printf "%G.\n\n" (-.objective.(0))
+      | Empty -> Printf.printf "Domain is empty\n\n"
+      | Unbound -> Printf.printf "Domain is unbounded\n\n"
+      | Opt -> print_string "Optimal solution is ";
+        if maxP then Printf.printf "%G" (objective.(0))
+        else Printf.printf "%G" (-.objective.(0));
+	print_string " at the point ";
+	this#printCurrentPoint();
     end;
 
-     if print then
-       print_string latexPostlude;
+    if print then
+      print_string latexPostlude;
 
     !sol
 

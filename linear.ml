@@ -1,5 +1,7 @@
 let epsilon = 1E-6;;
 
+let almostNaught x = abs_float(x) <= epsilon;;
+
 let print_array m = Array.iter (fun x -> print_float x; print_char ' ') m;;
 
 let normalize i a =

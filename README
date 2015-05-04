@@ -5,11 +5,13 @@ Langage utilisé : OCaml
 
 Format d'entrée : (...) (Celui décrit dans l'énoncé)
 
+NB : À cause des erreurs d'arrondis, dans la première phase, on ne teste pas si l'on arrive exactement à une constante nulle, mais nulle à epsilon = 1e-6 près (our modifier epsilon, il suffit de changer sa valeur dans le fichier linear.ml, epsilon étant dans l'entête).
+
 Rôles des différents modules :
       - lexer.mll et parser.mly : lexer et parser du format d'entrée, qui mettent
       au passage celle-ci sous forme normale.
 
-      - linear.ml : fonctions sur les tableau utiles pour l'implémentation de
+      - linear.ml : fonctions sur les tableaux utiles pour l'implémentation de
       l'algorithme du simplexe. Certaines d'entres elles font notamment l'hypothèse
       de notre choix de représentation des équations.
 
