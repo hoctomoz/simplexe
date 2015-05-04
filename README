@@ -1,6 +1,8 @@
 Algorithme du simplexe
 Léo Exibard & Paul Fermé
 
+ATTENTION : Ne pas supprimer le fichier totoprint : c'est un script sh, pas un fichier exécutable, mais on l'utilise comme précisé dans l'énoncé.
+
 Langage utilisé : OCaml
 
 Format d'entrée : (...) (Celui décrit dans l'énoncé)
